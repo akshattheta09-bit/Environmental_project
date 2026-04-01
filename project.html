@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI in Smart Traffic Management — Environmental Perspective</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0b0e0a;
+    --paper: #f2efe8;
+    --moss: #2d4a1e;
+    --acid: #a8e63d;
+    --rust: #c0392b;
+    --amber: #e8a020;
+    --slate: #1a2e1a;
+    --fog: #d6d2c4;
+    --muted: #7a7a6a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--slate);
+    color: var(--paper);
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0; right: 0;
+    height: 80px;
+    background: var(--paper);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--acid);
+    opacity: 0.85;
+  }
+
+  .badge {
+    border: 1px solid var(--acid);
+    padding: 0.3rem 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 4rem 0 6rem;
+    max-width: 900px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--acid);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--acid);
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 10vw, 8rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--paper);
+    margin-bottom: 1.5rem;
+  }
+
+  h1 em {
+    color: var(--acid);
+    font-style: normal;
+  }
+
+  .hero-desc {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 300;
+    color: var(--fog);
+    max-width: 600px;
+    line-height: 1.8;
+    font-style: italic;
+  }
+
+  .scroll-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  .scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+  }
+
+  /* ── FLOATING STAT PILLS ── */
+  .stat-strip {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 2rem;
+    background: var(--moss);
+    justify-content: center;
+  }
+
+  .stat-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 2rem;
+    border: 1px solid rgba(168,230,61,0.25);
+    min-width: 160px;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    color: var(--acid);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--fog);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--fog);
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--slate);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+
+  h2 em { color: var(--rust); font-style: italic; }
+
+  .section-intro {
+    font-size: 1.15rem;
+    color: var(--muted);
+    font-style: italic;
+    max-width: 700px;
+    margin-bottom: 3.5rem;
+    border-left: 3px solid var(--acid);
+    padding-left: 1.25rem;
+  }
+
+  /* ── RISK CARDS ── */
+  .risk-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2px;
+    background: var(--fog);
+    border: 2px solid var(--ink);
+  }
+
+  .risk-card {
+    background: var(--paper);
+    padding: 2rem;
+    position: relative;
+    transition: background 0.25s;
+  }
+
+  .risk-card:hover { background: #ebe7dc; }
+
+  .risk-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--fog);
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    z-index: 0;
+  }
+
+  .risk-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .risk-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.6rem;
+    color: var(--rust);
+    position: relative;
+    z-index: 1;
+  }
+
+  .risk-card p {
+    font-size: 0.95rem;
+    color: #444;
+    line-height: 1.65;
+    position: relative;
+    z-index: 1;
+  }
+
+  .severity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.9rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid currentColor;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sev-high { color: var(--rust); }
+  .sev-med  { color: var(--amber); }
+  .sev-mod  { color: var(--moss); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    background: var(--slate);
+    padding: 4rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .divider-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 5rem);
+    color: var(--paper);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .divider-text span { color: var(--acid); }
+
+  /* ── PRECAUTION TIMELINE ── */
+  .timeline {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--moss), var(--acid), var(--moss));
+  }
+
+  .tl-item {
+    position: relative;
+    margin-bottom: 3rem;
+    padding: 1.75rem 2rem;
+    background: #fff;
+    border: 1px solid var(--fog);
+    box-shadow: 4px 4px 0 var(--fog);
+  }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -2.65rem;
+    top: 1.85rem;
+    width: 14px;
+    height: 14px;
+    background: var(--acid);
+    border: 2px solid var(--moss);
+    border-radius: 50%;
+  }
+
+  .tl-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--moss);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .tl-item h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--slate);
+    margin-bottom: 0.5rem;
+  }
+
+  .tl-item p {
+    font-size: 0.98rem;
+    color: #555;
+    line-height: 1.7;
+  }
+
+  /* ── SAVIOR METHODS ── */
+  .savior-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .savior-card {
+    background: var(--slate);
+    color: var(--paper);
+    padding: 2.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .savior-card:hover { transform: translateY(-4px); }
+
+  .savior-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--acid);
+  }
+
+  .savior-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--acid);
+    margin-bottom: 0.75rem;
+  }
+
+  .savior-card p {
+    font-size: 0.95rem;
+    color: var(--fog);
+    line-height: 1.7;
+  }
+
+  .savior-card .method-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .impact-bar {
+    margin-top: 1.25rem;
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .impact-bar-fill {
+    height: 100%;
+    background: var(--acid);
+    border-radius: 2px;
+  }
+
+  .impact-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.12em;
+    margin-top: 0.4rem;
+    text-transform: uppercase;
+  }
+
+  /* ── DATA PANEL ── */
+  .data-panel {
+    background: var(--moss);
+    padding: 4rem 2rem;
+    margin: 0 -2rem;
+  }
+
+  .data-panel-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .data-panel h2 { color: var(--paper); }
+  .data-panel h2 em { color: var(--acid); }
+  .data-panel .section-intro { color: var(--fog); border-left-color: var(--acid); }
+  .data-panel .section-label { color: rgba(255,255,255,0.4); }
+  .data-panel .section-label::after { background: rgba(255,255,255,0.15); }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    font-size: 0.92rem;
+  }
+
+  .comparison-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--acid);
+    padding: 0.75rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(168,230,61,0.3);
+  }
+
+  .comparison-table td {
+    padding: 0.9rem 1.25rem;
+    color: var(--fog);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    vertical-align: top;
+  }
+
+  .comparison-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+  .dot-good { color: var(--acid); font-size: 1.2rem; }
+  .dot-bad  { color: var(--rust); font-size: 1.2rem; }
+  .dot-mid  { color: var(--amber); font-size: 1.2rem; }
+
+  /* ── QUOTE BLOCK ── */
+  .pull-quote {
+    border-left: 6px solid var(--acid);
+    padding: 1.5rem 2rem;
+    margin: 4rem 0;
+    background: #fff;
+    box-shadow: -6px 0 0 var(--moss);
+  }
+
+  .pull-quote blockquote {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.2rem, 3vw, 1.7rem);
+    font-style: italic;
+    color: var(--slate);
+    line-height: 1.5;
+  }
+
+  .pull-quote cite {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-top: 1rem;
+    font-style: normal;
+    text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: var(--fog);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  footer p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.3);
+    line-height: 2;
+  }
+
+  footer .footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--acid);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(11,14,10,0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(168,230,61,0.12);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: var(--acid);
+    letter-spacing: 0.08em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fog);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--acid); }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .risk-grid { grid-template-columns: 1fr; }
+    .savior-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── ANIMATE ON SCROLL (CSS-only via @keyframes + animation-timeline if supported, fallback graceful) ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .delay-1 { animation-delay: 0.15s; }
+  .delay-2 { animation-delay: 0.3s; }
+  .delay-3 { animation-delay: 0.45s; }
+  .delay-4 { animation-delay: 0.6s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">AI × Traffic × Earth</div>
+  <ul class="nav-links">
+    <li><a href="#risks">Risks</a></li>
+    <li><a href="#precautions">Precautions</a></li>
+    <li><a href="#savior">Solutions</a></li>
+    <li><a href="#data">Impact Data</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<header>
+  <div class="header-top">
+    <span class="badge">Environmental Analysis</span>
+    <span>Research Paper · 2024–2025</span>
+  </div>
+
+  <div class="hero-content">
+    <div class="eyebrow">AI in Smart Traffic Management</div>
+    <h1>THE ROAD<br>TO <em>GREEN</em><br>OR RUIN?</h1>
+    <p class="hero-desc">
+      Artificial Intelligence is reshaping how cities move — but the environmental consequences of smart traffic systems demand urgent scrutiny. This paper maps the risks, precautions, and possible salvation pathways.
+    </p>
+    <div class="scroll-hint">Scroll to explore</div>
+  </div>
+</header>
+
+<!-- STAT STRIP -->
+<div class="stat-strip">
+  <div class="stat-pill">
+    <span class="stat-num">25%</span>
+    <span class="stat-label">Global CO₂ from transport</span>
+  </div>
+  <div class="stat-pill">
+    <span class="stat-num">40%</span>
+    <span class="stat-label">Urban fuel wasted in congestion</span>
+  </div>
+  <div class="stat-pill">
+    <span class="stat-num">3×</span>
+    <span class="stat-label">AI data center energy surge by 2030</span>
+  </div>
+  <div class="stat-pill">
+    <span class="stat-num">17%</span>
+    <span class="stat-label">Potential emission reduction via AI traffic</span>
+  </div>
+</div>
+
+<!-- SECTION 1: RISKS -->
+<section id="risks">
+  <div class="section-label">01 — Environmental Risks</div>
+  <h2>What Could Go <em>Wrong</em></h2>
+  <p class="section-intro">
+    Smart traffic AI promises efficiency — yet its deployment introduces a set of serious, often overlooked environmental risks that could worsen the very crisis it claims to solve.
+  </p>
+
+  <div class="risk-grid">
+
+    <div class="risk-card fade-up">
+      <div class="risk-num">01</div>
+      <div class="risk-icon">⚡</div>
+      <h3>Massive Energy Consumption of AI Infrastructure</h3>
+      <p>Training and operating deep learning traffic models requires vast computing resources. Edge computing nodes, data centers, and real-time sensor networks consume enormous amounts of electricity — much of which still comes from fossil fuels. A single large-scale traffic AI deployment across a metro city can draw energy comparable to powering thousands of homes.</p>
+      <span class="severity sev-high">● High Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-1">
+      <div class="risk-num">02</div>
+      <div class="risk-icon">🌡️</div>
+      <h3>Electronic Waste from Sensor Hardware</h3>
+      <p>Smart traffic systems rely on dense networks of cameras, LiDAR units, IoT sensors, and embedded processors. These devices have limited lifespans and contain hazardous materials including lead, mercury, and rare earth metals. Rapid hardware cycling to keep up with AI model requirements creates significant e-waste that contaminates soil and water systems.</p>
+      <span class="severity sev-high">● High Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-2">
+      <div class="risk-num">03</div>
+      <div class="risk-icon">🏙️</div>
+      <h3>Induced Demand & Traffic Generation</h3>
+      <p>By making road travel faster and more efficient, AI traffic systems can paradoxically increase total vehicle usage — a phenomenon known as induced demand. More efficient roads attract more private vehicles, ultimately increasing total emissions even if per-trip efficiency improves. This rebound effect can cancel out AI's environmental gains entirely.</p>
+      <span class="severity sev-med">● Medium-High Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-3">
+      <div class="risk-num">04</div>
+      <div class="risk-icon">🧪</div>
+      <h3>Carbon Cost of AI Model Training</h3>
+      <p>Developing, retraining, and fine-tuning traffic prediction models generates significant carbon emissions. Large transformer and reinforcement learning models used for adaptive signal control require repeated training cycles as city infrastructure evolves. The carbon footprint of one major model training run can equal transatlantic flight emissions.</p>
+      <span class="severity sev-med">● Medium Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-1">
+      <div class="risk-num">05</div>
+      <div class="risk-icon">🌊</div>
+      <h3>Data Center Water Usage</h3>
+      <p>AI inference and training infrastructure requires cooling systems that consume enormous volumes of freshwater. Traffic management AI running 24/7 at scale stresses local water supplies, particularly in arid urban regions already facing climate-driven water scarcity. This creates a hidden environmental cost rarely included in sustainability assessments.</p>
+      <span class="severity sev-med">● Medium Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-2">
+      <div class="risk-num">06</div>
+      <div class="risk-icon">🛣️</div>
+      <h3>Urban Heat Island Amplification</h3>
+      <p>Optimized traffic flow can concentrate vehicle activity into dense arterial corridors, intensifying localized heat emissions and particulate matter deposition. This can worsen urban heat island effects in specific neighborhoods, disproportionately affecting lower-income communities and vulnerable populations living along major optimized routes.</p>
+      <span class="severity sev-mod">● Moderate Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-3">
+      <div class="risk-num">07</div>
+      <div class="risk-icon">🔋</div>
+      <h3>Rare Earth Mining for Hardware</h3>
+      <p>Manufacturing the semiconductors, magnets, and batteries powering smart traffic infrastructure demands rare earth elements — extracted through processes that devastate ecosystems, poison watersheds, and emit radioactive byproducts. The upstream environmental cost of deploying AI traffic hardware is largely invisible in urban sustainability metrics.</p>
+      <span class="severity sev-high">● High Severity</span>
+    </div>
+
+    <div class="risk-card fade-up delay-1">
+      <div class="risk-num">08</div>
+      <div class="risk-icon">🏗️</div>
+      <h3>Lock-In of Car-Centric Infrastructure</h3>
+      <p>Heavy investment in AI-optimized road networks can entrench political and economic dependence on private vehicle infrastructure, crowding out funding and political will for rail, cycling, and pedestrian systems. The green promise of AI traffic management may delay rather than accelerate the modal shift to truly sustainable transport.</p>
+      <span class="severity sev-high">● High Strategic Risk</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- PULL QUOTE -->
+<div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
+  <div class="pull-quote">
+    <blockquote>
+      "Making roads smarter without making cities less car-dependent is like installing a more efficient pipe into a sinking ship — the engineering is impressive, but the diagnosis is wrong."
+    </blockquote>
+    <cite>— Environmental Transport Research Synthesis, 2024</cite>
+  </div>
+</div>
+
+<!-- DIVIDER -->
+<div class="divider">
+  <div class="divider-text">PRECAUTIONS<br><span>MUST PRECEDE</span><br>DEPLOYMENT</div>
+</div>
+
+<!-- SECTION 2: PRECAUTIONS -->
+<section id="precautions">
+  <div class="section-label">02 — Precautionary Framework</div>
+  <h2>Before the <em>Algorithm</em> Runs</h2>
+  <p class="section-intro">
+    A responsible environmental approach to AI traffic management demands proactive safeguards — not afterthoughts. These precautions must be embedded into project planning, procurement, and governance from day one.
+  </p>
+
+  <div class="timeline">
+
+    <div class="tl-item fade-up">
+      <div class="tl-tag">Precaution 01 — Policy Level</div>
+      <h3>Mandatory Environmental Impact Assessment (EIA) for AI Systems</h3>
+      <p>All large-scale AI traffic deployments should be required to undergo a dedicated Environmental Impact Assessment — including lifecycle carbon analysis of hardware, operational energy modeling, and induced-demand simulations. These assessments must be made publicly available and reviewed by independent environmental bodies before system approval. No AI traffic system should go live without this baseline documentation.</p>
+    </div>
+
+    <div class="tl-item fade-up delay-1">
+      <div class="tl-tag">Precaution 02 — Energy Procurement</div>
+      <h3>Renewable Energy Mandates for Traffic AI Infrastructure</h3>
+      <p>City contracts with AI traffic vendors must include binding clauses requiring that all data centers, edge computing nodes, and network infrastructure serving the traffic management system operate on verified renewable energy. Power Purchase Agreements (PPAs) tied to additionality principles — meaning new renewable capacity, not just certificates — should be contractually enforced to ensure genuine decarbonization.</p>
+    </div>
+
+    <div class="tl-item fade-up delay-2">
+      <div class="tl-tag">Precaution 03 — Hardware Design</div>
+      <h3>Circular Economy Standards for Sensor & Device Procurement</h3>
+      <p>Municipal procurement policies must mandate that traffic AI hardware vendors meet ISO 14001 environmental management standards, offer take-back and recycling programs for all deployed devices, use modular designs that allow component repair and upgrade rather than full replacement, and disclose the full supply chain footprint including upstream mining and manufacturing emissions.</p>
+    </div>
+
+    <div class="tl-item fade-up delay-3">
+      <div class="tl-tag">Precaution 04 — Urban Planning Integration</div>
+      <h3>Modal Shift Conditionality in AI Traffic Contracts</h3>
+      <p>AI traffic optimization systems should be deployed only as part of a broader mobility strategy that includes binding targets for increasing cycling, pedestrian, and public transit modal shares. Investment in AI traffic management must be explicitly conditional on parallel investments in sustainable transport alternatives. This prevents the induced demand trap and ensures AI efficiency gains serve ecological rather than car-centric goals.</p>
+    </div>
+
+    <div class="tl-item fade-up delay-1">
+      <div class="tl-tag">Precaution 05 — Algorithmic Design</div>
+      <h3>Environmental Weighting in Optimization Objectives</h3>
+      <p>Traffic AI algorithms must be designed with explicit environmental objective functions — not solely travel time or throughput minimization. This means incorporating real-time emission estimation, air quality index data, noise pollution, and carbon intensity of the vehicle fleet into the optimization reward signal. Deploying AI that only optimizes speed without environmental weighting is environmentally irresponsible by design.</p>
+    </div>
+
+    <div class="tl-item fade-up delay-2">
+      <div class="tl-tag">Precaution 06 — Monitoring & Accountability</div>
+      <h3>Continuous Environmental Performance Dashboards</h3>
+      <p>Every deployed AI traffic system must be paired with a publicly accessible environmental performance monitoring dashboard showing real-time and historical data on system energy consumption, estimated CO₂ reduction or increase versus baseline, air quality changes along key corridors, and modal share trends. Regular third-party environmental audits should verify reported figures and trigger contract penalties for non-performance.</p>
+    </div>
+
+    <div class="tl-item fade-up delay-3">
+      <div class="tl-tag">Precaution 07 — Equity & Spatial Justice</div>
+      <h3>Environmental Justice Screening for Route Optimization</h3>
+      <p>AI traffic routing must be reviewed through an environmental justice lens to prevent the concentration of heavy traffic, noise, and pollution in low-income or minority-majority neighborhoods. Equity-weighted constraints must be built into optimization models, ensuring that the efficiency benefits of smart routing are not purchased at the cost of disproportionate environmental burden on already marginalized communities.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION 3: SAVIOR METHODS -->
+<section id="savior">
+  <div class="section-label">03 — Salvation Pathways</div>
+  <h2>How AI Can <em>Actually</em> Save the Planet</h2>
+  <p class="section-intro">
+    When designed with ecological intent, AI traffic management can become one of the most powerful tools in the urban sustainability arsenal. These are the methods that make the difference.
+  </p>
+
+  <div class="savior-grid">
+
+    <div class="savior-card">
+      <div class="method-icon">🌿</div>
+      <h3>Green Wave Signal Optimization</h3>
+      <p>AI can coordinate traffic signals across entire city corridors in real time to create continuous "green waves" — allowing vehicles to travel at a steady speed without stopping. This eliminates stop-start driving, which is the highest fuel-consumption and emission-generating driving pattern, reducing urban transport emissions by up to 20% on optimized corridors.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:82%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 82%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">⚡</div>
+      <h3>EV Fleet Priority Routing</h3>
+      <p>AI systems can give preferential signal timing and routing to verified electric vehicles, accelerating the economic and logistical advantage of EV adoption. By integrating with vehicle telematics, the system can guide EVs to destinations considering charging station proximity, battery level, and optimal low-energy routes — while simultaneously discouraging fossil fuel vehicles from high-pollution corridors.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:74%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 74%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">🚌</div>
+      <h3>Public Transit Signal Priority</h3>
+      <p>AI traffic management can grant absolute signal priority to buses and trams, dramatically improving transit reliability and speed. When public transport becomes consistently faster than private vehicles through AI-enabled priority, modal shift occurs naturally. This is the highest-leverage intervention: replacing ten private car trips with a single bus journey delivers an order-of-magnitude emission reduction per passenger.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:91%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 91%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">🛰️</div>
+      <h3>Predictive Demand Management</h3>
+      <p>Using historical patterns, event data, and real-time inputs, AI can predict traffic demand hours in advance and proactively manage it — adjusting parking pricing, congestion charges, and routing suggestions to smooth out demand peaks. This reduces the total vehicle-hours driven across a network, lowering cumulative emissions without requiring any behavioral change from individual drivers.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:68%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 68%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">🌱</div>
+      <h3>Carbon-Aware Routing Algorithms</h3>
+      <p>Next-generation navigation AI can route vehicles not just by fastest time but by lowest-carbon path — factoring in road gradient, real-time vehicle type mix, air quality sensor readings, and grid carbon intensity for electric vehicles. Integration with city-wide carbon dashboards allows the routing system to dynamically adjust recommendations to minimize citywide transport emissions in real time.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:77%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 77%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">🔄</div>
+      <h3>Freight Consolidation & Off-Peak AI Scheduling</h3>
+      <p>AI can coordinate urban freight deliveries across logistics companies, consolidating trips and scheduling heavy goods vehicles in off-peak hours and optimal low-congestion routes. This reduces the enormous environmental impact of last-mile logistics — one of the fastest-growing sources of urban emissions — by eliminating redundant trips and optimizing load factors across the entire urban delivery ecosystem.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:71%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 71%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">☀️</div>
+      <h3>Solar-Powered Edge Intelligence</h3>
+      <p>Deploying traffic AI through solar-powered edge computing nodes — where AI inference happens locally at the intersection rather than in centralized data centers — can cut the energy footprint of smart traffic infrastructure by over 60%. Solar canopies on traffic signal poles can power local AI processors, cameras, and V2X communication hardware entirely from renewable energy at the point of use.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:63%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 63%</div>
+    </div>
+
+    <div class="savior-card">
+      <div class="method-icon">🤝</div>
+      <h3>Multimodal Integration — The Complete Ecosystem</h3>
+      <p>The most powerful environmental application of AI traffic management is full multimodal integration: a single AI brain coordinating cars, buses, metro, bikes, e-scooters, and pedestrian flows simultaneously. By treating the entire urban mobility ecosystem as one optimization problem, AI can create seamless green corridors that make sustainable modes always faster, cheaper, and more convenient than driving — the ultimate environmental endgame.</p>
+      <div class="impact-bar"><div class="impact-bar-fill" style="width:96%"></div></div>
+      <div class="impact-label">Environmental Impact Potential: 96%</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DATA SECTION -->
+<div class="data-panel" id="data">
+  <div class="data-panel-inner">
+    <section style="padding: 2rem 0;">
+      <div class="section-label">04 — Impact Comparison</div>
+      <h2>Scenario <em>Analysis</em></h2>
+      <p class="section-intro">
+        Not all AI traffic deployments are equal. The environmental outcome depends entirely on design choices, governance, and integration with broader transport policy.
+      </p>
+
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Energy Model</th>
+            <th>CO₂ Outcome</th>
+            <th>Modal Shift</th>
+            <th>E-Waste Risk</th>
+            <th>Net Env. Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:#a8e63d">Ideal Deployment</strong><br><small>Renewable-powered, multimodal, equity-weighted AI</small></td>
+            <td>100% renewable</td>
+            <td><span class="dot-good">▼</span> −22% emissions</td>
+            <td><span class="dot-good">●</span> Strong increase</td>
+            <td><span class="dot-good">●</span> Low (circular)</td>
+            <td><strong style="color:#a8e63d">Excellent</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Grid-Powered with EV Priority</strong><br><small>Mixed grid, includes EV routing</small></td>
+            <td>Mixed grid</td>
+            <td><span class="dot-mid">▼</span> −10% emissions</td>
+            <td><span class="dot-mid">●</span> Moderate</td>
+            <td><span class="dot-mid">●</span> Medium</td>
+            <td><strong style="color:#e8a020">Good</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Car-Centric Speed Optimization</strong><br><small>AI only optimizes vehicle throughput</small></td>
+            <td>Fossil grid</td>
+            <td><span class="dot-bad">▲</span> +5–12% via induced demand</td>
+            <td><span class="dot-bad">●</span> Decline</td>
+            <td><span class="dot-mid">●</span> Medium</td>
+            <td><strong style="color:#c0392b">Poor</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Unregulated Rapid Deployment</strong><br><small>No EIA, fossil-powered, no modal policy</small></td>
+            <td>Fossil grid</td>
+            <td><span class="dot-bad">▲</span> Net increase</td>
+            <td><span class="dot-bad">●</span> Strong decline</td>
+            <td><span class="dot-bad">●</span> High</td>
+            <td><strong style="color:#c0392b">Harmful</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<!-- CLOSING -->
+<section>
+  <div class="section-label">05 — Conclusion</div>
+  <h2>The Road We <em>Choose</em></h2>
+  <p class="section-intro">AI in smart traffic is not inherently green — it is a tool that amplifies intent.</p>
+
+  <p style="font-size:1.1rem;line-height:1.9;color:#333;max-width:800px;margin-bottom:1.5rem;">
+    The environmental outcome of deploying AI in urban traffic management will be determined not by the sophistication of the algorithms, but by the values embedded in their design, the governance frameworks that constrain their deployment, and the urban planning philosophies they serve.
+  </p>
+  <p style="font-size:1.1rem;line-height:1.9;color:#333;max-width:800px;margin-bottom:1.5rem;">
+    Deployed carelessly — to serve car-centric throughput on fossil-powered infrastructure — AI traffic management will worsen urban emissions, generate e-waste, and lock cities into another generation of automobile dependency. Deployed with ecological intent — renewable-powered, multimodal, equity-weighted, and integrated with genuine sustainable transport investment — it can become one of the most effective urban climate tools of the 21st century.
+  </p>
+  <p style="font-size:1.1rem;line-height:1.9;color:#333;max-width:800px;">
+    The technology exists. The question is whether the political will, the regulatory architecture, and the environmental ethics exist to deploy it responsibly. That choice is not made by engineers — it is made by policymakers, city planners, procurement officers, and the communities who demand accountability from them.
+  </p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-title">AI × SMART TRAFFIC × ENVIRONMENT</div>
+  <p>Environmental Analysis · AI in Smart Traffic Management<br>
+  Risks · Precautions · Savior Methods<br><br>
+  Research Document — Academic & Policy Use<br>
+  Prepared with Environmental Focus · 2024–2025</p>
+</footer>
+
+</body>
+</html>
