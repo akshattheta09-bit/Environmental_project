@@ -3,7 +3,7 @@ import {
 } from "lucide-react"
 import { SmoothScrollHero } from "./components/ui/smooth-scroll-hero"
 import { ThemeProvider, ThemeToggle } from "./components/theme-provider"
-import RotatingEarth from "./components/ui/wireframe-dotted-globe"
+import { AbstractNetworkGlobe } from "./components/ui/abstract-network-globe"
 import { motion } from "framer-motion"
 
 import { PollutantGrid } from "./components/ui/pollutant-grid"
@@ -292,7 +292,7 @@ function App() {
             {...fadeUp}
             className="w-full max-w-4xl aspect-[4/3] relative flex justify-center items-center rounded-[2.5rem] p-4 bg-white/50 dark:bg-card/50 backdrop-blur-sm border border-border shadow-2xl dark:shadow-none"
           >
-            <RotatingEarth width={1000} height={700} />
+            <AbstractNetworkGlobe />
           </motion.div>
           
           <motion.p 
