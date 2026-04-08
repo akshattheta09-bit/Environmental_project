@@ -6,14 +6,15 @@ import {
 	useMotionTemplate,
 	useScroll,
 	useTransform,
-    AnimatePresence
+    AnimatePresence,
+    useInView
 } from "framer-motion";
 
 const desktopImages = [
-    "https://images.unsplash.com/photo-1511884642898-4c92249e20b6", // Dark grid
-    "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2400", // City grid
-    "https://images.unsplash.com/photo-1573324671408-db2823c9ce05?q=80&w=2400", // Traffic streaks
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2400"  // Global lights
+    "/hero-1.jpg", 
+    "/hero-2.jpg", 
+    "/hero-3.jpg", 
+    "/hero-4.jpg"  
 ];
 
 interface iISmoothScrollHeroProps {
@@ -41,16 +42,20 @@ const SmoothScrollHeroBackground: React.FC<iISmoothScrollHeroBackgroundProps> = 
 	const opacity = useTransform(scrollY, [0, scrollHeight], [0.35, 0.75]);
 
     const [bgIndex, setBgIndex] = React.useState(0);
+    const containerRef = React.useRef(null);
+    const isInView = useInView(containerRef);
 
     React.useEffect(() => {
+        if (!isInView) return;
         const interval = setInterval(() => {
             setBgIndex(prev => (prev + 1) % desktopImages.length);
         }, 5000); 
         return () => clearInterval(interval);
-    }, []);
+    }, [isInView]);
 
 	return (
 		<motion.div
+            ref={containerRef}
 			className="sticky top-0 h-screen w-full bg-teal-950 dark:bg-black overflow-hidden"
 			style={{
 				clipPath,
@@ -120,16 +125,16 @@ const AnimatedTitle = ({ text1, text2 }: { text1: string, text2: string }) => {
 
     return (
         <motion.div variants={textVariants} initial="hidden" animate="visible" className="w-full relative z-20 drop-shadow-[0_5px_15px_rgba(0,0,0,0.6)]">
-            {renderText(text1, "text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] font-sans font-extrabold tracking-tight leading-[0.9] text-white")}
-            {renderText(text2, "text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] font-serif font-medium italic tracking-tighter leading-[0.9] text-emerald-400 mt-2")}
+            {renderText(text1, "text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] font-sans font-extrabold tracking-tight leading-[0.9] text-zinc-900 dark:text-white")}
+            {renderText(text2, "text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] font-serif font-medium italic tracking-tighter leading-[0.9] text-emerald-700 dark:text-emerald-400 mt-2")}
         </motion.div>
     )
 }
 
 export const SmoothScrollHero: React.FC<iISmoothScrollHeroProps> = ({
 	scrollHeight = 1000,
-	desktopImage = "https://images.unsplash.com/photo-1511884642898-4c92249e20b6",
-	mobileImage = "https://images.unsplash.com/photo-1511207538754-e8555f2bc187?q=80&w=2412&auto=format&fit=crop",
+	desktopImage = "/hero-1.jpg",
+	mobileImage = "/hero-1.jpg",
 	initialClipPercentage = 25,
 	finalClipPercentage = 75,
 }) => {
@@ -153,8 +158,8 @@ export const SmoothScrollHero: React.FC<iISmoothScrollHeroProps> = ({
                     transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
                     className="mb-8 relative z-20 mt-[-5vh]"
                 >
-                    <div className="px-6 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl">
-                        <span className="text-white/90 text-xs font-sans tracking-[0.3em] uppercase font-semibold">
+                    <div className="px-6 py-2 rounded-full border border-black/20 dark:border-white/20 bg-black/5 dark:bg-white/10 backdrop-blur-md shadow-2xl">
+                        <span className="text-zinc-900 dark:text-white/90 text-xs font-sans tracking-[0.3em] uppercase font-semibold">
                             Global Impact Report
                         </span>
                     </div>
@@ -166,7 +171,7 @@ export const SmoothScrollHero: React.FC<iISmoothScrollHeroProps> = ({
                   initial={{ opacity: 0, filter: "blur(10px)", y: 20 }}
                   animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
                   transition={{ duration: 1.2, delay: 1.2, ease: "easeOut" }}
-                  className="mx-auto max-w-[55ch] text-emerald-50/90 text-center text-lg md:text-2xl mt-10 font-sans font-light leading-relaxed hidden sm:block relative z-20"
+                  className="mx-auto max-w-[55ch] text-zinc-700 dark:text-emerald-50/90 text-center text-lg md:text-2xl mt-10 font-sans font-light leading-relaxed hidden sm:block relative z-20"
                 >
                   Artificial Intelligence is reshaping how cities move — but the unprecedented environmental consequences demand an urgent redesign to save our planet.
                 </motion.p>
@@ -178,8 +183,8 @@ export const SmoothScrollHero: React.FC<iISmoothScrollHeroProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
             >
-                <div className="w-[1px] h-24 bg-gradient-to-b from-white to-transparent origin-top scale-y-100"></div>
-                <span className="text-[9px] uppercase tracking-[0.4em] font-sans font-bold">Discover</span>
+                <div className="w-[1px] h-24 bg-gradient-to-b from-zinc-500 dark:from-white to-transparent origin-top scale-y-100"></div>
+                <span className="text-[9px] uppercase tracking-[0.4em] font-sans font-bold text-zinc-600 dark:text-white/50">Discover</span>
             </motion.div>
 		</div>
 	);

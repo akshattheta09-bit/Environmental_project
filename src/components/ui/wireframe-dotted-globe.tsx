@@ -167,9 +167,8 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
       context.lineWidth = 1.5 * scaleFactor
       context.stroke()
 
-      // Orbital Rings Visualization
       const now = Date.now();
-      const ringCount = 50;
+      const ringCount = 20; // Reduced from 50
 
       // Outer Tilted Orbit
       context.beginPath();
@@ -190,25 +189,8 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
       }
       context.fillStyle = "rgba(45, 212, 191, 0.7)";
       context.fill();
-
-      // Inner Tilted Orbit (counter-rotating)
-      context.beginPath();
-      for (let i = 0; i < ringCount; i++) {
-          const t = ((now + i * (12000 / ringCount)) % 12000) / 12000;
-          const angle = -t * Math.PI * 2;
-          const orbitScaleX = currentScale * 1.3;
-          const orbitScaleY = currentScale * 0.5;
-          const tilt = -Math.PI / 6; // -30 deg
-          const cx = Math.cos(angle) * orbitScaleX;
-          const cy = Math.sin(angle) * orbitScaleY;
-          const rx = cx * Math.cos(tilt) - cy * Math.sin(tilt);
-          const ry = cx * Math.sin(tilt) + cy * Math.cos(tilt);
-          
-          context.moveTo(containerWidth / 2 + rx, containerHeight / 2 + ry);
-          context.arc(containerWidth / 2 + rx, containerHeight / 2 + ry, 1.5 * scaleFactor, 0, 2*Math.PI);
-      }
-      context.fillStyle = "rgba(94, 234, 212, 0.4)";
-      context.fill();
+      
+      // Removed Inner Orbit for performance
 
       if (landFeatures) {
         // Draw graticule
@@ -300,17 +282,17 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
         // Generate dots for all land features
         let totalDots = 0
         landFeatures.features.forEach((feature: any) => {
-          // Changed to tighter spacing (12) for higher fidelity
-          const dots = generateDotsInPolygon(feature, 12)
+          // Changed spacing to 24 for high performance
+          const dots = generateDotsInPolygon(feature, 24)
           dots.forEach(([lng, lat]) => {
             allDots.push({ lng, lat, visible: true })
             totalDots++
           })
         })
 
-        // Generate AI Network nodes and links
-        const nodeCount = 150;
-        const linkCount = 100;
+        // Generate AI Network nodes and links (Reduced for perf)
+        const nodeCount = 40;
+        const linkCount = 20;
         for (let i = 0; i < nodeCount; i++) {
             if (allDots.length > 0) {
                const node = allDots[Math.floor(Math.random() * allDots.length)];
@@ -347,12 +329,14 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
       }
     }
 
-    // Set up rotation and interaction
     const rotation: [number, number, number] = [0, 0, 0]
     let autoRotate = true
     const rotationSpeed = 0.5
+    let isVisible = true
 
     const rotate = () => {
+      if (!isVisible) return
+      
       if (autoRotate) {
         rotation[0] += rotationSpeed
         projection.rotate(rotation)
@@ -362,6 +346,16 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
 
     // Auto-rotation timer
     const rotationTimer = d3.timer(rotate)
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        isVisible = entry.isIntersecting
+      })
+    }, { threshold: 0 })
+
+    if (canvas) {
+      observer.observe(canvas)
+    }
 
     const handleMouseDown = (event: MouseEvent) => {
       autoRotate = false
@@ -379,7 +373,7 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
         rotation[1] = Math.max(-90, Math.min(90, rotation[1]))
 
         projection.rotate(rotation)
-        render()
+        if (isVisible) render()
       }
 
       const handleMouseUp = () => {
@@ -400,7 +394,7 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
       const scaleFactor = event.deltaY > 0 ? 0.9 : 1.1
       const newRadius = Math.max(radius * 0.5, Math.min(radius * 3, projection.scale() * scaleFactor))
       projection.scale(newRadius)
-      render()
+      if (isVisible) render()
     }
 
     canvas.addEventListener("mousedown", handleMouseDown)
@@ -412,6 +406,7 @@ export default function RotatingEarth({ width = 800, height = 600, className = "
     // Cleanup
     return () => {
       rotationTimer.stop()
+      observer.disconnect()
       canvas.removeEventListener("mousedown", handleMouseDown)
       canvas.removeEventListener("wheel", handleWheel)
     }

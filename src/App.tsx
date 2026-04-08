@@ -6,6 +6,15 @@ import { ThemeProvider, ThemeToggle } from "./components/theme-provider"
 import RotatingEarth from "./components/ui/wireframe-dotted-globe"
 import { motion } from "framer-motion"
 
+import { PollutantGrid } from "./components/ui/pollutant-grid"
+import { ArchitectureComponents } from "./components/ui/architecture-components"
+import { AiHierarchy } from "./components/ui/ai-hierarchy"
+import { StepByStep } from "./components/ui/step-by-step"
+import { EnvironmentalBenefits } from "./components/ui/environmental-benefits"
+import { SdgAlignment } from "./components/ui/sdg-alignment"
+import { LiteratureProblem } from "./components/ui/literature-problem"
+import { SignificanceImpact } from "./components/ui/significance-impact"
+
 // Reusable animation configuration
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -70,6 +79,12 @@ function App() {
             ))}
           </motion.div>
         </div>
+
+        {/* SECTION: LITERATURE CONTEXT */}
+        <LiteratureProblem />
+
+        {/* SECTION: POLLUTANT EFFECTS */}
+        <PollutantGrid />
 
         {/* SECTION 1: RISKS */}
         <section id="risks" className="py-40 md:py-48 px-6 md:px-12 max-w-7xl mx-auto">
@@ -173,6 +188,16 @@ function App() {
             ))}
           </motion.div>
         </section>
+
+        {/* SECTION: PRODUCT ARCHITECTURE & AI */}
+        <ArchitectureComponents />
+        <AiHierarchy />
+        <StepByStep />
+
+        {/* SECTION: ENVIRONMENTAL BENEFITS & IMPACT & SDGs */}
+        <EnvironmentalBenefits />
+        <SignificanceImpact />
+        <SdgAlignment />
 
         {/* PULL QUOTE */}
         <section className="py-32 px-6 max-w-5xl mx-auto">
